@@ -1,10 +1,16 @@
+* { margin:0; padding:0; } /* to remove the top and left whitespace */
+
 html, body {
   font-size: 20px;
   font-family: 'Roboto Mono', monospace;
   height: 100%;
+  width: 100%;
   margin: 0;
   padding: 0;
 }
+
+canvas { display:block; } /* To remove the scrollbars */
+canvas { background: #eee; } /* to show the canvas bounds */
 
 .text-align-center {
   text-align: center;

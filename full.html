@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<title>HTML5 Canvas Filling Window and Centered</title>
+<style type="text/css">
+	html,body { background:#fff; height:100%; margin:0; padding:0; overflow:hidden }
+	canvas { position:absolute; top:0; left:0 }
+	p { position:absolute; left:0; right:0; text-align:center; margin:0; padding:0.5em 5em; background:rgba(240,240,240,0.7) }
+	#head { top:0; border-bottom:1px solid #999; }
+	#foot { bottom:0; font-size:85%; border-top:1px solid #999; font-style:italic; }
+	#fps { position:absolute; right:1em; }
+</style>
+</head><body>
+	<canvas></canvas>
+	<p id="head">Showing how to resize an HTML5 Canvas to fill the browser window without scaling the contents,<br>and keeping the <code>0,0</code> coordinates centered on the screen.<br>Written to support <a href="http://stackoverflow.com/a/8686566/405017">this Stack Overflow answer</a>.</p>
+	<p id="foot">Copyright ©2012 <a href="mailto:!@phrogz.net">Gavin Kistner</a>; comments/criticisms welcome.<span id="fps"></span></p>
+	
+	<script type="text/javascript">
+		var ctx = document.querySelector('canvas').getContext('2d'),
+		    fpsout = document.querySelector('#fps');
+		var asteroids=[];
+
+		initializeAsteroids();
+		resizeCanvas();
+		window.addEventListener('resize', resizeCanvas, false);
+		setInterval(drawFrame, 1000 / 60);
+
+		function resizeCanvas() {
+			var w = document.body.offsetWidth,
+			    h = document.body.offsetHeight;
+			ctx.canvas.width  = w;
+			ctx.canvas.height = h;
+			ctx.translate(w/2,h/2);
+			ctx.strokeStyle = 'red';
+			ctx.fillStyle = 'black';
+			drawFrame();
+		}
+
+		function initializeAsteroids() {
+			for (var i = 0; i < 100; ++i) {
+				asteroids.push({
+					size: Math.random() * 30 + 10,
+					x: Math.random() * 2000 - 1000,
+					y: Math.random() * 2000 - 1000,
+					vx: Math.random() * 50 - 25,
+					vy: Math.random() * 50 - 25,
+					angle: Math.random() * 90,
+					speed: Math.random() * 70 + 20,
+					dir: Math.round(Math.random())*2 - 1
+				});
+			}
+		}
+
+		var lastUpdate = new Date, fps=30;
+
+		function drawFrame() {
+			var now = new Date;
+			var dt = (now - lastUpdate) / 1000;
+			if (dt==0 || isNaN(dt)) return;
+				
+			ctx.save();
+			ctx.setTransform(1,0,0,1,0,0);
+			ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+			ctx.restore();
+			
+			drawAsteroids();    
+			drawShip();
+			moveAsteroids(dt);
+
+			lastUpdate = now;
+			fps += (1/dt - fps) / 10;
+		}
+
+		function drawAsteroids(){
+			for (var i=0,len=asteroids.length; i<len; ++i){
+				var a = asteroids[i], size = a.size;
+				ctx.save();
+				ctx.translate(a.x - size, a.y - size);
+				ctx.rotate(a.angle);
+				ctx.strokeRect(-size, -size, size*2, size*2);
+				ctx.restore();
+			}
+		}
+
+		function moveAsteroids(dt){
+			for (var i=0,len=asteroids.length; i<len; ++i){
+				var a = asteroids[i];
+				a.angle += a.speed * dt * Math.PI / 180 * a.dir;
+				a.x += a.vx*dt;
+				a.y += a.vy*dt;
+				a.vx += Math.random()*6-3;
+				a.vy += Math.random()*6-3;
+			}
+		}
+
+		function drawShip(){
+			ctx.save();
+			ctx.rotate(2*Math.sin((new Date)/800));
+			ctx.beginPath();
+			ctx.moveTo(0,-20);
+			ctx.lineTo(10,20);
+			ctx.lineTo(0,10);
+			ctx.lineTo(0,10);
+			ctx.lineTo(-10,20);
+			ctx.closePath();
+			ctx.fill();
+			ctx.restore();
+		}
+
+		setInterval(function(){
+			fpsout.innerHTML = fps.toFixed(1)+"fps";
+		},1000);
+
+	</script>
+</body></html>
